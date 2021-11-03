@@ -1,5 +1,5 @@
 const readline = require('readline');
-const {stdin, stdout} = process;
+const {stdout} = process;
 
 const rl = readline.createInterface(
     process.stdin, process.stdout);
