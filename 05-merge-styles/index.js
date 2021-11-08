@@ -1,42 +1,33 @@
 const fs = require('fs');
+const fsPromises = require('fs').promises;
 const path = require('path');
 
-fs.readdir(path.join(__dirname, 'styles'), {withFileTypes: true}, (err, files) => {
-
-    if (err) console.log(err);
-
-    else {
-
-        let array = [];
-
-        files.forEach(file => {
-
-            if (file.isFile() && (path.extname(file.name) === '.css')) {
-
-                fs.readFile(path.join(__dirname, 'styles', `${file.name}`), (err, data) => {
-
-                    if (err) throw err;
-                    
-                    let subArray = data.toString().split("\n");
-
-                    array = array.concat(subArray);
-
-                    let file = fs.createWriteStream(path.join(__dirname, 'project-dist', 'bundle.css'));
-
-                    file.on('error', err => {
-                        console.log(err)
-                    });
-
-                    array.forEach(value => file.write(`${value}\n`));
-
-                    file.end();
-                });
-
-            }
-
-        });
-
+const readDate = async (path) => {
+    const file = fs.createReadStream(path, 'utf-8');
+    let data = '';
+    for await (const piece of file) {
+        data += piece;
     }
+    return data;
 
-});
+};
+
+const getStyles = async () => {
+    const files = await fsPromises.readdir(path.join(__dirname, 'styles'), {withFileTypes: true});
+    let styles = [];
+    for (let file of files) {
+        if (file.isFile() && path.extname(path.join(__dirname, 'styles', file.name)) === '.css') {
+            const data = await readDate(path.join(__dirname, 'styles', file.name));
+            styles.push(data);
+        }
+    }
+    return styles;
+};
+
+(async function () {
+    const outputStyles = fs.createWriteStream(path.join(__dirname, 'project-dist', 'bundle.css'), 'utf-8');
+    for (let style of await getStyles()) {
+        outputStyles.write(`${style}\n`);
+    }
+}());
 
