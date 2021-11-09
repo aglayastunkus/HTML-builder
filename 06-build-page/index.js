@@ -54,7 +54,7 @@ const getStyles = async () => {
 };
 
 (async () => {
-    await fsPromises.rmdir(path.join(__dirname, 'project-dist'), {recursive: true});
+    await fsPromises.rm(path.join(__dirname, 'project-dist'), {recursive: true, force:true});
     await fsPromises.mkdir(path.join(__dirname, 'project-dist'), {recursive: true});
 
     await copyDirectory(path.join(__dirname, 'assets'), path.join(__dirname, 'project-dist', 'assets'));
